@@ -1,7 +1,8 @@
 ---
-layout: archive
+layout: home
 permalink: /
-title: "Latest Posts"
+image:
+  feature: abstract.jpg
 ---
 
 <div class="tiles">

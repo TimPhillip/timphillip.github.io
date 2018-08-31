@@ -6,7 +6,7 @@ categories: blog ai
 
 image:
     teaser: turbofan.gif
-    feature: turbofan.jpg
+    feature: turbofan.png
     credit: Photo by Inspirationfeed on Unsplash
 ---
 

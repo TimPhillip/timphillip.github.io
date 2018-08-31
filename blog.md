@@ -1,5 +1,5 @@
 ---
-title: Browse Blog Content
+title: Content
 permalink: /blog/
 layout: archive
 ---

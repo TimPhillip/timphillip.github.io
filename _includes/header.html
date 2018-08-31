@@ -1,3 +1,7 @@
+{% if page.math != false %}
+  {% include mathjax.html %}
+{% endif %}
+
 <header id="masthead">
   <div class="inner-wrap">
     <a href="{{ site.url }}/" class="site-title">{{ site.title }}</a>

@@ -31,6 +31,8 @@ The algorithm is trained on the [NASA Turbofan Degradation Dataset](https://c3.n
 In this dataset engine degradation is carried out until failure while recording many sensor readings.
 The Task is to predict the RUL of an unseen engine's sensor readings.
 
+![NASA](https://www.nasa.gov/sites/all/themes/custom/nasatwo/images/nasa-logo.svg)
+
 
 #### Derived Sensor Readings
 

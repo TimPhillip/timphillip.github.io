@@ -27,13 +27,11 @@ Recently I read a [paper by Malhotra et. al.](https://arxiv.org/abs/1608.06154) 
 
 A [turbofan](https://en.wikipedia.org/wiki/Turbofan) is a kind a of jet engine that is widely used in aviation. It's critical to avoid failure and keep maintenance costs low at the same time. So predicting the remaining uselful life of an engine would be useful.
 
-<div>
-    <img align="right" src="https://www.nasa.gov/sites/all/themes/custom/nasatwo/images/nasa-logo.svg">
 
-    The algorithm is trained on the [NASA Turbofan Degradation Dataset](https://c3.nasa.gov/dashlink/resources/139/).
-    In this dataset engine degradation is carried out until failure while recording many sensor readings.
-    The Task is to predict the RUL of an unseen engine's sensor readings.
-</div>
+![NASA](https://www.nasa.gov/sites/all/themes/custom/nasatwo/images/nasa-logo.svg){: .align-right}
+The algorithm is trained on the [NASA Turbofan Degradation Dataset](https://c3.nasa.gov/dashlink/resources/139/).
+In this dataset engine degradation is carried out until failure while recording many sensor readings.
+The Task is to predict the RUL of an unseen engine's sensor readings.
 
 
 #### Derived Sensor Readings

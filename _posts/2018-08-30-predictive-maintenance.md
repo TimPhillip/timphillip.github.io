@@ -88,5 +88,5 @@ Afterwards estimate the Health Index for the training instances with
 python -m rul_estimate.turbofan_rul --target_hi
 ```
 
-**Notice:** `.notice-info` All ideas presented in this post are taken from the [paper by Malhotra et. al.](https://arxiv.org/abs/1608.06154). All implementations are reproductions based on my understanding of the paper.
+**Notice:** All ideas presented in this post are taken from the [paper by Malhotra et. al.](https://arxiv.org/abs/1608.06154). All implementations are reproductions based on my understanding of the paper.
 {: .notice-info}

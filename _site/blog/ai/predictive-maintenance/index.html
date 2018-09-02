@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Predictive Maintenance using LSTM Autoencoder • Tim Schneider</title>
+    <meta name="description" content="
+
+
+
+">
+    <meta name="keywords" content="">
+    
+    	<!-- Twitter Cards -->
+	<meta name="twitter:title" content="Predictive Maintenance using LSTM Autoencoder">
+	<meta name="twitter:description" content="
+
+
+
+">
+	
+	
+	
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="/images/turbofan.png">
+	
+	<!-- Open Graph -->
+	<meta property="og:locale" content="en">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="Predictive Maintenance using LSTM Autoencoder">
+	<meta property="og:description" content="
+
+
+
+">
+	<meta property="og:url" content="/blog/ai/predictive-maintenance/">
+	<meta property="og:site_name" content="Tim Schneider">
+
+    <link rel="canonical" href="/blog/ai/predictive-maintenance/">
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Tim Schneider Atom Feed">
+    <link href="/sitemap.xml" type="application/xml" rel="sitemap" title="Sitemap">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cleartype" content="on">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <!-- HTML5 Shiv and Media Query Support for IE -->
+    <!--[if lt IE 9]>
+      <script src="/js/vendor/html5shiv.min.js"></script>
+      <script src="/js/vendor/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body id="js-body">
+    <!--[if lt IE 9]><div class="upgrade notice-warning"><strong>Your browser is quite old!</strong> Why not <a href="http://whatbrowser.org/">upgrade to a newer one</a> to better enjoy this site?</div><![endif]-->
+
+    
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+<header id="masthead">
+  <div class="inner-wrap">
+    <a href="/" class="site-title">Tim Schneider</a>
+    <nav role="navigation" class="menu top-menu">
+        <ul class="menu-item">
+	<li class="home"><a href="/">Tim Schneider</a></li>
+	
+    
+    <li><a href="/blog/" >Blog</a></li>
+  
+    
+    <li><a href="/about/" >About</a></li>
+  
+    
+    <li><a href="/contact/" >Contact</a></li>
+  
+</ul>
+    </nav>
+  </div><!-- /.inner-wrap -->
+</header><!-- /.masthead -->
+    <nav role="navigation" id="js-menu" class="sliding-menu-content">
+  <h5>Tim Schneider <span>Table of Contents</span></h5>
+  <ul class="menu-item">
+    <li>
+      <a href="/blog/">
+        
+        <div class="title">Blog</div>
+        
+      </a>
+    </li><li>
+      <a href="/about/">
+        
+        <div class="title">About</div>
+        
+      </a>
+    </li><li>
+      <a href="/contact/">
+        
+        <div class="title">Contact</div>
+        
+      </a>
+    </li>
+  </ul>
+</nav>
+<button type="button" id="js-menu-trigger" class="sliding-menu-button lines-button x2" role="button" aria-label="Toggle Navigation">
+  <span class="nav-lines"></span>
+</button>
+
+<div id="js-menu-screen" class="menu-screen"></div>
+
+
+    <div id="page-wrapper">
+      <div id="main" role="main">
+	<article class="wrap" itemscope itemtype="http://schema.org/Article">
+		
+		<div class="page-feature">
+			<div class="page-image">
+				<img src="/images/turbofan.png" class="page-feature-image" alt="Predictive Maintenance using LSTM Autoencoder" itemprop="image">
+				<div class="image-credit">Image source: <a href="" itemprop="citation">Photo by Inspirationfeed on Unsplash</a></div><!-- /.image-credit -->
+			</div><!-- /.page-image -->
+		</div><!-- /.page-feature -->
+		
+		
+  <nav class="breadcrumbs">
+    <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+      <a href="" itemprop="url">
+        <span itemprop="title">Home</span>
+      </a> › 
+    <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+      <a href="/blog/" itemprop="url">
+        <span itemprop="title">Blog</span>
+      </a>
+    </span>
+  </nav><!-- /.breadcrumbs -->
+
+		<div class="page-title">
+			<h1>Predictive Maintenance using LSTM Autoencoder</h1>
+		</div>
+		<div class="inner-wrap">
+			<div id="content" class="page-content" itemprop="articleBody">
+				<nav class="toc">
+
+</nav>
+
+<h5 id="predictive-maintenance">Predictive Maintenance</h5>
+<p>Nowadays machines are most likely maintained in fixed service intervals. This might lead to high inspection costs and even higher costs, when the machine breaks before the next routine service check. A big promise of Industry 4.0 and collecting sensor readings in terms of Big Data is to avoid such unecessary maintainance by predicting a service time interval that fits right the condition of your machine.</p>
+
+<hr />
+
+<p>Recently I read a <a href="https://arxiv.org/abs/1608.06154">paper by Malhotra et. al.</a> about how to use <strong>LSTM Autoencoders</strong> to predict the <strong>R</strong>emaining <strong>U</strong>seful <strong>L</strong>ife (RUL) of a machine. The basic idea is to use an <strong>Autoencoder</strong>, which is trained on healthy state, as a measure of anomaly for an arbitray sequence of sensor readings.</p>
+
+<hr />
+
+<h4 id="turbofan-sensor-data-from-nasa">Turbofan Sensor Data from Nasa</h4>
+
+<p><img align="left" src="https://upload.wikimedia.org/wikipedia/commons/4/44/Turbofan3_Unlabelled.gif" width="25%" style="margin:10px" />
+A <a href="https://en.wikipedia.org/wiki/Turbofan">turbofan</a> is a kind a of jet engine that is widely used in aviation. It’s critical to avoid failure and keep maintenance costs low at the same time. So predicting the remaining uselful life of an engine would be useful.</p>
+
+<p><img align="right" src="https://www.nasa.gov/sites/all/themes/custom/nasatwo/images/nasa-logo.svg" />
+The algorithm is trained on the <a href="https://c3.nasa.gov/dashlink/resources/139/">NASA Turbofan Degradation Dataset</a>.
+In this dataset engine degradation is carried out until failure while recording many sensor readings.
+The Task is to predict the RUL of an unseen engine’s sensor readings.</p>
+
+<h4 id="derived-sensor-readings">Derived Sensor Readings</h4>
+<p>The autoencoder in the paper is not directly trained on sensor readings. For training they use so called <strong>derived sensors</strong> <script type="math/tex">z_t</script>, which are basically the (first 3) principle components of the entire sensor reading data.
+These sensors are determined by performing a <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Principle Component Analysis (PCA)</a> on the centered sensor readings. With this the dimensionalty of the data is reduced and (linear) correlation between sensors are removed.</p>
+
+<figure class="once" align="center">
+    <img src="/images/rul/example_pca.png" width="40%" />
+    <figcaption>Example for Principle Components derived by PCA</figcaption>
+</figure>
+
+<h4 id="lstm-autoencoder">LSTM Autoencoder</h4>
+<p>Train an LSTM Autoencoder to predict these derived sensor readings <script type="math/tex">z_t</script> of a machine in healthy state. It is assumed that the instance is in healthy condition during the first steps, so using cropped sequences from the start of the training data does the job.
+Once trained, let the autoencoder reconstruct the entire series and record the reconstruction error $e^{(u)}_t$.</p>
+
+<figure class="once" align="center">
+    <img src="/images/rul/autoencoder.png" width="70%" />
+    <figcaption>Processing an example sequence of (derived) sensor readings $\langle z_1, z_2, z_3 \rangle$ with the autoencoder. Illustration is taken from the original paper.</figcaption>
+</figure>
+
+<p>\begin{equation}
+e^{(u)}_t = || z^{(u)}_t - z’^{(u)}_t ||_2^2
+\end{equation}</p>
+
+<h4 id="health-index-hi">Health Index (HI)</h4>
+<p>Based on the reconstruction error $e^{(u)}_t$ one can define a <strong>health index (HI)</strong>.</p>
+
+<p>\begin{equation}
+h^{(u)}_t = \frac{e^{(u)}_M - e^{(u)}_t}{e^{(u)}_M - e^{(u)}_m}
+\end{equation}
+with $e^{(u)}_M$ denoting the maximum error and $e^{(u)}_m$ denoting the minimum error.</p>
+
+<p>See that the reconstruction error is correlated with the machine’s health or lifetime respectively. The plots can be resproduced with the code provided in the repository.</p>
+
+<figure class="once" align="center">
+    <img src="/images/rul/normalized_hi.pdf" width="80%" />
+    <figcaption>Reconstruction error based health index averaged over all training instances (and normalized by their lifetime). The errorbars indicate one standard deviation.</figcaption>
+</figure>
+
+<p>The actual RUL is estimated by function matching with all the HI curves in the training set. (This part is not in my implementation for now)</p>
+
+<p>Checkout my <strong>Tensorflow</strong> implementation on <a href="https://github.com/TimPhillip/rul_estimate">Github</a>.</p>
+
+<p>Just run
+<code class="highlighter-rouge">shell
+python -m rul_estimate.turbofan_rul --train_ae
+</code>
+to train the autoencoder part.</p>
+
+<p>Afterwards estimate the Health Index for the training instances with
+<code class="highlighter-rouge">shell
+python -m rul_estimate.turbofan_rul --target_hi
+</code></p>
+
+<p class="notice-info"><strong>Notice:</strong> <code class="highlighter-rouge">.notice-info</code> All ideas presented in this post are taken from the <a href="https://arxiv.org/abs/1608.06154">paper by Malhotra et. al.</a>. All implementations are reproductions based on my understanding of the paper.</p>
+
+				<hr />
+				<footer class="page-footer">
+					
+
+<div class="author-image">
+	<img src="/images/bio-tim.jpg" alt="Tim Schneider">
+</div><!-- ./author-image -->
+<div class="author-content">
+	<h3 class="author-name" >Written by <span itemprop="author">Tim Schneider</span></h3>
+	<p class="author-bio"></p>
+</div><!-- ./author-content -->
+					<div class="inline-btn">
+	<a class="btn-social twitter" href="https://twitter.com/intent/tweet?text=Predictive%20Maintenance%20using%20LSTM%20Autoencoder&amp;url=/blog/ai/predictive-maintenance/&amp;via=" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i> Share on Twitter</a>
+	<a class="btn-social facebook" href="https://www.facebook.com/sharer/sharer.php?u=/blog/ai/predictive-maintenance/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i> Share on Facebook</a>
+	<a class="btn-social google-plus"  href="https://plus.google.com/share?url=/blog/ai/predictive-maintenance/" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i> Share on Google+</a>
+</div><!-- /.share-this -->
+
+					<div class="page-meta">
+	<p>Updated <time datetime="2018-08-31T00:00:00Z" itemprop="datePublished">August 31, 2018</time></p>
+</div><!-- /.page-meta -->
+				</footer><!-- /.footer -->
+				<aside>
+					
+				</aside>
+			</div><!-- /.content -->
+		</div><!-- /.inner-wrap -->
+		
+	</article><!-- ./wrap -->
+</div><!-- /#main -->
+
+      <footer role="contentinfo" id="site-footer">
+	<nav role="navigation" class="menu bottom-menu">
+		<ul class="menu-item">
+		
+      
+			<li><a href="" ></a></li>
+		
+		</ul>
+	</nav><!-- /.bottom-menu -->
+	<p class="copyright">&#169; 2018 <a href="">Tim Schneider</a> powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> + <a href="http://mmistakes.github.io/skinny-bones-jekyll/" rel="nofollow">Skinny Bones</a>.</p>
+</footer>
+    </div>
+
+    <script src="/js/vendor/jquery-1.9.1.min.js"></script>
+    <script src="/js/main.js"></script>
+
+  </body>
+
+</html>

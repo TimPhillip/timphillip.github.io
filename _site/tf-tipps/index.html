@@ -1,0 +1,18 @@
+<h1 id="tensorflow-tipps">Tensorflow Tipps</h1>
+
+<p>Although Tensorflow is well documented for its basic features, the documentation becomes rather sparse when coming to more advanced topics.
+This blog post is a collection of best practice gathered from various Stackoverflow posts and Github issues over time.
+Due to the frequently changing Tensorflow API, I can not guarantee that the ideas presented in this post will stay best pratice for a lon time.</p>
+
+<p>Furthermore the aim of this post is not to introduce the basics of Tensorflow, as there already a great documentation exists.
+It’s for people that are already familiar with Tensorflow and want to get inspired on how to write more efficient code.</p>
+
+<h3 id="graph-definition-vs-execution">1 Graph Definition vs. Execution</h3>
+<p>Well, to be honest: this is not really an advanced topic. 
+But to write efficient Tensorflow code it is important to distinguish between graph definition and its execution: 
+We use <strong>Python</strong> to describe a computational graph. 
+This graph is actually executed in a session with fast <strong>C++</strong> implementations.
+So whenever calling a function from <code class="highlighter-rouge">tf.</code> module you add a operation-node to the definition of the graph.</p>
+
+<p>I like to do all the graph definitions in python classes:</p>
+

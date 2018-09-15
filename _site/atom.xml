@@ -1,4 +1,130 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-02T16:14:58+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Predictive Maintenance using LSTM Autoencoder</title><link href="/blog/ai/predictive-maintenance/" rel="alternate" type="text/html" title="Predictive Maintenance using LSTM Autoencoder" /><published>2018-08-31T00:00:00+02:00</published><updated>2018-08-31T00:00:00+02:00</updated><id>/blog/ai/predictive-maintenance</id><content type="html" xml:base="/blog/ai/predictive-maintenance/">&lt;nav class=&quot;toc&quot;&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-15T17:06:45+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Variational Autoencoders</title><link href="/blog/ai/vae/" rel="alternate" type="text/html" title="Variational Autoencoders" /><published>2018-09-15T12:00:00+02:00</published><updated>2018-09-15T12:00:00+02:00</updated><id>/blog/ai/vae</id><content type="html" xml:base="/blog/ai/vae/">&lt;nav class=&quot;toc&quot;&gt;
+
+&lt;/nav&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/vae/mnist_ae.png&quot; alt=&quot;Learned Latent Space of AE&quot; /&gt;
+&lt;img src=&quot;/images/vae/mnist_vae.png&quot; alt=&quot;Learned Latent Space of VAE&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Examples for Reconstructions of the Autoencoder:
+&lt;img src=&quot;/images/vae/mnist_7.png&quot; alt=&quot;MNIST digit&quot; /&gt;
+&lt;img src=&quot;/images/vae/recon_7.png&quot; alt=&quot;MNIST reconstruction&quot; /&gt;&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;vae/vae_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;vae/vae_feature.png&quot;}" /></entry><entry><title>Guide for better Tensorflow</title><link href="/blog/ai/tf-tipps/" rel="alternate" type="text/html" title="Guide for better Tensorflow" /><published>2018-09-14T20:00:00+02:00</published><updated>2018-09-14T20:00:00+02:00</updated><id>/blog/ai/tf-tipps</id><content type="html" xml:base="/blog/ai/tf-tipps/">&lt;nav class=&quot;toc&quot;&gt;
+&lt;ul id=&quot;markdown-toc&quot;&gt;
+  &lt;li&gt;&lt;a href=&quot;#graph-definition-vs-execution&quot; id=&quot;markdown-toc-graph-definition-vs-execution&quot;&gt;1 Graph Definition vs. Execution&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#tensor-shapes&quot; id=&quot;markdown-toc-tensor-shapes&quot;&gt;2 Tensor Shapes&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#monitored-training-session&quot; id=&quot;markdown-toc-monitored-training-session&quot;&gt;3 Monitored Training Session&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#hooks&quot; id=&quot;markdown-toc-hooks&quot;&gt;4 Hooks&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#efficient-input-pipeline&quot; id=&quot;markdown-toc-efficient-input-pipeline&quot;&gt;5 Efficient Input Pipeline&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#switching-datasets&quot; id=&quot;markdown-toc-switching-datasets&quot;&gt;6 Switching Datasets&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#scaffold&quot; id=&quot;markdown-toc-scaffold&quot;&gt;7 Scaffold&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;#embedding-projector&quot; id=&quot;markdown-toc-embedding-projector&quot;&gt;8 Embedding Projector&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;/nav&gt;
+
+&lt;p&gt;Although Tensorflow is well documented for its basic features, the documentation becomes rather sparse when coming to more advanced topics.
+This blog post is a collection of best practice gathered from various Stackoverflow posts and Github issues over time.
+Due to the frequently changing Tensorflow API, I can not guarantee that the ideas presented in this post will stay best pratice for a lon time.&lt;/p&gt;
+
+&lt;p&gt;Furthermore the aim of this post is not to introduce the basics of Tensorflow, as there already a great documentation exists.
+It’s for people that are already familiar with Tensorflow and want to get inspired on how to write more efficient code.&lt;/p&gt;
+
+&lt;h1 id=&quot;graph-definition-vs-execution&quot;&gt;1 Graph Definition vs. Execution&lt;/h1&gt;
+&lt;p&gt;Well, to be honest: this is not really an advanced topic. 
+But to write efficient Tensorflow code it is important to distinguish between graph definition and its execution: 
+We use &lt;strong&gt;Python&lt;/strong&gt; to describe a computational graph. 
+This graph is actually executed in a session with fast &lt;strong&gt;C++&lt;/strong&gt; implementations.
+So whenever calling a function from &lt;code class=&quot;highlighter-rouge&quot;&gt;tf.&lt;/code&gt; module you add a operation-node to the definition of the graph.&lt;/p&gt;
+
+&lt;p&gt;I like to do all the graph definitions in python classes:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;Model&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__init__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;input&lt;/span&gt;
+
+        &lt;span class=&quot;c&quot;&gt;# Calls the graph definition once&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__define_network&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+    
+    &lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__define_network&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+
+        &lt;span class=&quot;c&quot;&gt;# Use class properties to keep track of the references to Tensorflow Ops&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;logits&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+        &lt;span class=&quot;bp&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loss&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;This allows clean organisation, because all tensors belonging to a particular model are properties of a class instance e.g. &lt;code class=&quot;highlighter-rouge&quot;&gt;model.loss&lt;/code&gt;.
+Furthermore it is easy to build larger models out of subcomponents and keeping track of all the losses for subcomponents.&lt;/p&gt;
+
+&lt;p&gt;Once you have done all your graph definition it is important to &lt;a href=&quot;https://www.tensorflow.org/api_docs/python/tf/Graph#finalize&quot;&gt;finalize&lt;/a&gt; your graph with &lt;code class=&quot;highlighter-rouge&quot;&gt;tf.get_default_graph().finalize()&lt;/code&gt;. When using a &lt;a href=&quot;https://www.tensorflow.org/api_docs/python/tf/train/MonitoredTrainingSession&quot;&gt;MonitoredTrainingSession&lt;/a&gt; this is already done for you.&lt;/p&gt;
+
+&lt;p class=&quot;notice-success&quot;&gt;&lt;strong&gt;Conclusion:&lt;/strong&gt;&lt;br /&gt;
+Keep a clean separation between graph definition and its execution in your code. Adding nodes at runtime is slow. Use &lt;code class=&quot;highlighter-rouge&quot;&gt;tf.get_default_graph().finalize()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;tensor-shapes&quot;&gt;2 Tensor Shapes&lt;/h1&gt;
+&lt;p&gt;With the difference of graph definition and execution in mind I want to continue with tensor shapes. Especially when creating flexible multilayer models it is important to know the shape of tensors. In Tensorflow there are two options to do this:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;tf.shape(tensor)&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;tensor.get_shape()&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The difference between this two is that &lt;code class=&quot;highlighter-rouge&quot;&gt;get_shape()&lt;/code&gt; is a property of the python object which encapsulates the operation node in the graph. So we just query the shape that is stored with the node while defining the graph. On the other hand with &lt;code class=&quot;highlighter-rouge&quot;&gt;tf.shape()&lt;/code&gt; we create a new operation node which computes the shape of another node when evaluated. But this evaluation is performed when running a session. This is also sometimes referred as &lt;strong&gt;static&lt;/strong&gt; vs. &lt;strong&gt;dynamic&lt;/strong&gt; shape of a tensor.&lt;/p&gt;
+
+&lt;p&gt;As long as a static shape is defined (it can be &lt;code class=&quot;highlighter-rouge&quot;&gt;None&lt;/code&gt; if it is not clear before runtime) it is good pratices to make use of it, e.g.:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;num_features&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inputs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;get_shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;as_list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p class=&quot;notice-success&quot;&gt;&lt;strong&gt;Conclusion:&lt;/strong&gt;&lt;br /&gt;
+Make use of static shape.&lt;/p&gt;
+
+&lt;h1 id=&quot;monitored-training-session&quot;&gt;3 Monitored Training Session&lt;/h1&gt;
+&lt;iframe src=&quot;https://giphy.com/embed/ZKw0NDn10ljSE&quot; width=&quot;240&quot; height=&quot;174&quot; frameborder=&quot;0&quot; class=&quot;giphy-embed&quot; allowfullscreen=&quot;&quot; align=&quot;right&quot;&gt;&lt;/iframe&gt;
+&lt;p&gt;To setup a good training session with logging and saving checkpoints can be a lot of work. The good news is that Tensorflow provides a implementation doing most of these things for us: the &lt;a href=&quot;https://www.tensorflow.org/api_docs/python/tf/train/MonitoredTrainingSession&quot;&gt;MonitoredTrainingSession&lt;/a&gt;.
+It also automatically recovers from a checkpoint if there already exists one or initializes all the variables otherwise.
+The usage is really simple:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;train&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MonitoredTrainingSession&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sess&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;sess&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;run&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;In the following I will asume the use of such a session for running the graph computations.&lt;/p&gt;
+
+&lt;p class=&quot;notice-success&quot;&gt;&lt;strong&gt;Conclusion:&lt;/strong&gt; &lt;br /&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;tf.train.MonitoredTrainingSession()&lt;/code&gt; makes life much easier.&lt;/p&gt;
+
+&lt;h1 id=&quot;hooks&quot;&gt;4 Hooks&lt;/h1&gt;
+&lt;p&gt;A monitored session like above is trivial to use as long as you only need standard behaviour. Tensorflow provides a concept called &lt;a href=&quot;https://www.tensorflow.org/api_guides/python/train#Training_Hooks&quot;&gt;Hooks&lt;/a&gt; to customize behaviour in various stages of the training procedure.
+Like a hook you can link a peace of code to a particular stage of the session:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;begin()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;after_create_session()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;before_run()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;after_run()&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;end()&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;In which order hooks are called by a monitored session can be found in detail &lt;a href=&quot;https://www.tensorflow.org/api_docs/python/tf/train/MonitoredSession&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h1 id=&quot;efficient-input-pipeline&quot;&gt;5 Efficient Input Pipeline&lt;/h1&gt;
+
+&lt;p class=&quot;notice-warning&quot;&gt;Don’t use tf.placeholder()&lt;/p&gt;
+
+&lt;h1 id=&quot;switching-datasets&quot;&gt;6 Switching Datasets&lt;/h1&gt;
+
+&lt;h1 id=&quot;scaffold&quot;&gt;7 Scaffold&lt;/h1&gt;
+
+&lt;h1 id=&quot;embedding-projector&quot;&gt;8 Embedding Projector&lt;/h1&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;tf_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;tf.png&quot;}" /></entry><entry><title>Mixture Density Networks</title><link href="/blog/ai/mdn/" rel="alternate" type="text/html" title="Mixture Density Networks" /><published>2018-09-02T20:00:00+02:00</published><updated>2018-09-02T20:00:00+02:00</updated><id>/blog/ai/mdn</id><content type="html" xml:base="/blog/ai/mdn/">&lt;nav class=&quot;toc&quot;&gt;
+
+&lt;/nav&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/mdn/mdn_prediction.png&quot; alt=&quot;MDN prediction&quot; /&gt;
+&lt;img src=&quot;/images/mdn/mdn_temperatures.gif&quot; alt=&quot;MDN temperature&quot; /&gt;
+&lt;img src=&quot;/images/mdn/mixture_pdf.png&quot; alt=&quot;pdf&quot; /&gt;&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;mdn/mdn_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;mdn/mdn_feature.png&quot;}" /></entry><entry><title>Predictive Maintenance using LSTM Autoencoder</title><link href="/blog/ai/predictive-maintenance/" rel="alternate" type="text/html" title="Predictive Maintenance using LSTM Autoencoder" /><published>2018-08-31T00:00:00+02:00</published><updated>2018-08-31T00:00:00+02:00</updated><id>/blog/ai/predictive-maintenance</id><content type="html" xml:base="/blog/ai/predictive-maintenance/">&lt;nav class=&quot;toc&quot;&gt;
 
 &lt;/nav&gt;
 
@@ -73,4 +199,4 @@ to train the autoencoder part.&lt;/p&gt;
 python -m rul_estimate.turbofan_rul --target_hi
 &lt;/code&gt;&lt;/p&gt;
 
-&lt;p class=&quot;notice-info&quot;&gt;&lt;strong&gt;Notice:&lt;/strong&gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;.notice-info&lt;/code&gt; All ideas presented in this post are taken from the &lt;a href=&quot;https://arxiv.org/abs/1608.06154&quot;&gt;paper by Malhotra et. al.&lt;/a&gt;. All implementations are reproductions based on my understanding of the paper.&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;turbofan.gif&quot;, &quot;feature&quot;=&gt;&quot;turbofan.png&quot;, &quot;credit&quot;=&gt;&quot;Photo by Inspirationfeed on Unsplash&quot;}" /></entry></feed>
+&lt;p class=&quot;notice-info&quot;&gt;&lt;strong&gt;Notice:&lt;/strong&gt; All ideas presented in this post are taken from the &lt;a href=&quot;https://arxiv.org/abs/1608.06154&quot;&gt;paper by Malhotra et. al.&lt;/a&gt;. All implementations are reproductions based on my understanding of the paper.&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;turbofan.gif&quot;, &quot;feature&quot;=&gt;&quot;turbofan.png&quot;, &quot;credit&quot;=&gt;&quot;Photo by Inspirationfeed on Unsplash&quot;}" /></entry></feed>

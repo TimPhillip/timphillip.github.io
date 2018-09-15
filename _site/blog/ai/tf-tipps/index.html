@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Guide for better Tensorflow • Tim Schneider</title>
+    <meta name="description" content="
+
+
+
+">
+    <meta name="keywords" content="">
+    
+    	<!-- Twitter Cards -->
+	<meta name="twitter:title" content="Guide for better Tensorflow">
+	<meta name="twitter:description" content="
+
+
+
+">
+	
+	
+	
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="/images/tf.png">
+	
+	<!-- Open Graph -->
+	<meta property="og:locale" content="en">
+	<meta property="og:type" content="article">
+	<meta property="og:title" content="Guide for better Tensorflow">
+	<meta property="og:description" content="
+
+
+
+">
+	<meta property="og:url" content="/blog/ai/tf-tipps/">
+	<meta property="og:site_name" content="Tim Schneider">
+
+    <link rel="canonical" href="/blog/ai/tf-tipps/">
+
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Tim Schneider Atom Feed">
+    <link href="/sitemap.xml" type="application/xml" rel="sitemap" title="Sitemap">
+
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cleartype" content="on">
+
+    <link rel="stylesheet" href="/css/main.css">
+    <!-- HTML5 Shiv and Media Query Support for IE -->
+    <!--[if lt IE 9]>
+      <script src="/js/vendor/html5shiv.min.js"></script>
+      <script src="/js/vendor/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body id="js-body">
+    <!--[if lt IE 9]><div class="upgrade notice-warning"><strong>Your browser is quite old!</strong> Why not <a href="http://whatbrowser.org/">upgrade to a newer one</a> to better enjoy this site?</div><![endif]-->
+
+    
+  <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+<header id="masthead">
+  <div class="inner-wrap">
+    <a href="/" class="site-title">Tim Schneider</a>
+    <nav role="navigation" class="menu top-menu">
+        <ul class="menu-item">
+	<li class="home"><a href="/">Tim Schneider</a></li>
+	
+    
+    <li><a href="/blog/" >Blog</a></li>
+  
+    
+    <li><a href="/about/" >About</a></li>
+  
+    
+    <li><a href="/contact/" >Contact</a></li>
+  
+</ul>
+    </nav>
+  </div><!-- /.inner-wrap -->
+</header><!-- /.masthead -->
+    <nav role="navigation" id="js-menu" class="sliding-menu-content">
+  <h5>Tim Schneider <span>Table of Contents</span></h5>
+  <ul class="menu-item">
+    <li>
+      <a href="/blog/">
+        
+        <div class="title">Blog</div>
+        
+      </a>
+    </li><li>
+      <a href="/about/">
+        
+        <div class="title">About</div>
+        
+      </a>
+    </li><li>
+      <a href="/contact/">
+        
+        <div class="title">Contact</div>
+        
+      </a>
+    </li>
+  </ul>
+</nav>
+<button type="button" id="js-menu-trigger" class="sliding-menu-button lines-button x2" role="button" aria-label="Toggle Navigation">
+  <span class="nav-lines"></span>
+</button>
+
+<div id="js-menu-screen" class="menu-screen"></div>
+
+
+    <div id="page-wrapper">
+      <div id="main" role="main">
+	<article class="wrap" itemscope itemtype="http://schema.org/Article">
+		
+		<div class="page-feature">
+			<div class="page-image">
+				<img src="/images/tf.png" class="page-feature-image" alt="Guide for better Tensorflow" itemprop="image">
+				
+			</div><!-- /.page-image -->
+		</div><!-- /.page-feature -->
+		
+		
+  <nav class="breadcrumbs">
+    <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+      <a href="" itemprop="url">
+        <span itemprop="title">Home</span>
+      </a> › 
+    <span itemscope itemtype="http://data-vocabulary.org/Breadcrumb">
+      <a href="/blog/" itemprop="url">
+        <span itemprop="title">Blog</span>
+      </a>
+    </span>
+  </nav><!-- /.breadcrumbs -->
+
+		<div class="page-title">
+			<h1>Guide for better Tensorflow</h1>
+		</div>
+		<div class="inner-wrap">
+			<div id="content" class="page-content" itemprop="articleBody">
+				<nav class="toc">
+<ul id="markdown-toc">
+  <li><a href="#graph-definition-vs-execution" id="markdown-toc-graph-definition-vs-execution">1 Graph Definition vs. Execution</a></li>
+  <li><a href="#tensor-shapes" id="markdown-toc-tensor-shapes">2 Tensor Shapes</a></li>
+  <li><a href="#monitored-training-session" id="markdown-toc-monitored-training-session">3 Monitored Training Session</a></li>
+  <li><a href="#hooks" id="markdown-toc-hooks">4 Hooks</a></li>
+  <li><a href="#efficient-input-pipeline" id="markdown-toc-efficient-input-pipeline">5 Efficient Input Pipeline</a></li>
+  <li><a href="#switching-datasets" id="markdown-toc-switching-datasets">6 Switching Datasets</a></li>
+  <li><a href="#scaffold" id="markdown-toc-scaffold">7 Scaffold</a></li>
+  <li><a href="#embedding-projector" id="markdown-toc-embedding-projector">8 Embedding Projector</a></li>
+</ul>
+
+</nav>
+
+<p>Although Tensorflow is well documented for its basic features, the documentation becomes rather sparse when coming to more advanced topics.
+This blog post is a collection of best practice gathered from various Stackoverflow posts and Github issues over time.
+Due to the frequently changing Tensorflow API, I can not guarantee that the ideas presented in this post will stay best pratice for a lon time.</p>
+
+<p>Furthermore the aim of this post is not to introduce the basics of Tensorflow, as there already a great documentation exists.
+It’s for people that are already familiar with Tensorflow and want to get inspired on how to write more efficient code.</p>
+
+<h1 id="graph-definition-vs-execution">1 Graph Definition vs. Execution</h1>
+<p>Well, to be honest: this is not really an advanced topic. 
+But to write efficient Tensorflow code it is important to distinguish between graph definition and its execution: 
+We use <strong>Python</strong> to describe a computational graph. 
+This graph is actually executed in a session with fast <strong>C++</strong> implementations.
+So whenever calling a function from <code class="highlighter-rouge">tf.</code> module you add a operation-node to the definition of the graph.</p>
+
+<p>I like to do all the graph definitions in python classes:</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Model</span><span class="p">():</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span>
+
+        <span class="c"># Calls the graph definition once</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__define_network</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__define_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c"># Use class properties to keep track of the references to Tensorflow Ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logits</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="o">...</span>
+</code></pre>
+</div>
+
+<p>This allows clean organisation, because all tensors belonging to a particular model are properties of a class instance e.g. <code class="highlighter-rouge">model.loss</code>.
+Furthermore it is easy to build larger models out of subcomponents and keeping track of all the losses for subcomponents.</p>
+
+<p>Once you have done all your graph definition it is important to <a href="https://www.tensorflow.org/api_docs/python/tf/Graph#finalize">finalize</a> your graph with <code class="highlighter-rouge">tf.get_default_graph().finalize()</code>. When using a <a href="https://www.tensorflow.org/api_docs/python/tf/train/MonitoredTrainingSession">MonitoredTrainingSession</a> this is already done for you.</p>
+
+<p class="notice-success"><strong>Conclusion:</strong><br />
+Keep a clean separation between graph definition and its execution in your code. Adding nodes at runtime is slow. Use <code class="highlighter-rouge">tf.get_default_graph().finalize()</code>.</p>
+
+<h1 id="tensor-shapes">2 Tensor Shapes</h1>
+<p>With the difference of graph definition and execution in mind I want to continue with tensor shapes. Especially when creating flexible multilayer models it is important to know the shape of tensors. In Tensorflow there are two options to do this:</p>
+
+<ol>
+  <li><code class="highlighter-rouge">tf.shape(tensor)</code></li>
+  <li><code class="highlighter-rouge">tensor.get_shape()</code></li>
+</ol>
+
+<p>The difference between this two is that <code class="highlighter-rouge">get_shape()</code> is a property of the python object which encapsulates the operation node in the graph. So we just query the shape that is stored with the node while defining the graph. On the other hand with <code class="highlighter-rouge">tf.shape()</code> we create a new operation node which computes the shape of another node when evaluated. But this evaluation is performed when running a session. This is also sometimes referred as <strong>static</strong> vs. <strong>dynamic</strong> shape of a tensor.</p>
+
+<p>As long as a static shape is defined (it can be <code class="highlighter-rouge">None</code> if it is not clear before runtime) it is good pratices to make use of it, e.g.:</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">num_features</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">as_list</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</code></pre>
+</div>
+
+<p class="notice-success"><strong>Conclusion:</strong><br />
+Make use of static shape.</p>
+
+<h1 id="monitored-training-session">3 Monitored Training Session</h1>
+<iframe src="https://giphy.com/embed/ZKw0NDn10ljSE" width="240" height="174" frameborder="0" class="giphy-embed" allowfullscreen="" align="right"></iframe>
+<p>To setup a good training session with logging and saving checkpoints can be a lot of work. The good news is that Tensorflow provides a implementation doing most of these things for us: the <a href="https://www.tensorflow.org/api_docs/python/tf/train/MonitoredTrainingSession">MonitoredTrainingSession</a>.
+It also automatically recovers from a checkpoint if there already exists one or initializes all the variables otherwise.
+The usage is really simple:</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">MonitoredTrainingSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">sess</span><span class="p">:</span>
+    <span class="n">sess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>In the following I will asume the use of such a session for running the graph computations.</p>
+
+<p class="notice-success"><strong>Conclusion:</strong> <br />
+<code class="highlighter-rouge">tf.train.MonitoredTrainingSession()</code> makes life much easier.</p>
+
+<h1 id="hooks">4 Hooks</h1>
+<p>A monitored session like above is trivial to use as long as you only need standard behaviour. Tensorflow provides a concept called <a href="https://www.tensorflow.org/api_guides/python/train#Training_Hooks">Hooks</a> to customize behaviour in various stages of the training procedure.
+Like a hook you can link a peace of code to a particular stage of the session:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">begin()</code></li>
+  <li><code class="highlighter-rouge">after_create_session()</code></li>
+  <li><code class="highlighter-rouge">before_run()</code></li>
+  <li><code class="highlighter-rouge">after_run()</code></li>
+  <li><code class="highlighter-rouge">end()</code></li>
+</ul>
+
+<p>In which order hooks are called by a monitored session can be found in detail <a href="https://www.tensorflow.org/api_docs/python/tf/train/MonitoredSession">here</a>.</p>
+
+<h1 id="efficient-input-pipeline">5 Efficient Input Pipeline</h1>
+
+<p class="notice-warning">Don’t use tf.placeholder()</p>
+
+<h1 id="switching-datasets">6 Switching Datasets</h1>
+
+<h1 id="scaffold">7 Scaffold</h1>
+
+<h1 id="embedding-projector">8 Embedding Projector</h1>
+
+
+				<hr />
+				<footer class="page-footer">
+					
+
+<div class="author-image">
+	<img src="/images/bio-tim.jpg" alt="Tim Schneider">
+</div><!-- ./author-image -->
+<div class="author-content">
+	<h3 class="author-name" >Written by <span itemprop="author">Tim Schneider</span></h3>
+	<p class="author-bio"></p>
+</div><!-- ./author-content -->
+					<div class="inline-btn">
+	<a class="btn-social twitter" href="https://twitter.com/intent/tweet?text=Guide%20for%20better%20Tensorflow&amp;url=/blog/ai/tf-tipps/&amp;via=" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i> Share on Twitter</a>
+	<a class="btn-social facebook" href="https://www.facebook.com/sharer/sharer.php?u=/blog/ai/tf-tipps/" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i> Share on Facebook</a>
+	<a class="btn-social google-plus"  href="https://plus.google.com/share?url=/blog/ai/tf-tipps/" target="_blank"><i class="fa fa-google-plus" aria-hidden="true"></i> Share on Google+</a>
+</div><!-- /.share-this -->
+
+					<div class="page-meta">
+	<p>Updated <time datetime="2018-09-14T20:00:00Z" itemprop="datePublished">September 14, 2018</time></p>
+</div><!-- /.page-meta -->
+				</footer><!-- /.footer -->
+				<aside>
+					
+				</aside>
+			</div><!-- /.content -->
+		</div><!-- /.inner-wrap -->
+		
+	</article><!-- ./wrap -->
+</div><!-- /#main -->
+
+      <footer role="contentinfo" id="site-footer">
+	<nav role="navigation" class="menu bottom-menu">
+		<ul class="menu-item">
+		
+      
+			<li><a href="" ></a></li>
+		
+		</ul>
+	</nav><!-- /.bottom-menu -->
+	<p class="copyright">&#169; 2018 <a href="">Tim Schneider</a> powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> + <a href="http://mmistakes.github.io/skinny-bones-jekyll/" rel="nofollow">Skinny Bones</a>.</p>
+</footer>
+    </div>
+
+    <script src="/js/vendor/jquery-1.9.1.min.js"></script>
+    <script src="/js/main.js"></script>
+
+  </body>
+
+</html>

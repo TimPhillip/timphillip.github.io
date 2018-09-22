@@ -1,13 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-22T09:27:11+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Variational Autoencoders</title><link href="/blog/ai/vae/" rel="alternate" type="text/html" title="Variational Autoencoders" /><published>2018-09-15T12:00:00+02:00</published><updated>2018-09-15T12:00:00+02:00</updated><id>/blog/ai/vae</id><content type="html" xml:base="/blog/ai/vae/">&lt;nav class=&quot;toc&quot;&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-22T09:38:49+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Variational Autoencoders</title><link href="/blog/ai/vae/" rel="alternate" type="text/html" title="Variational Autoencoders" /><published>2018-09-15T12:00:00+02:00</published><updated>2018-09-15T12:00:00+02:00</updated><id>/blog/ai/vae</id><content type="html" xml:base="/blog/ai/vae/">&lt;nav class=&quot;toc&quot;&gt;
 
 &lt;/nav&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/vae/mnist_ae.png&quot; alt=&quot;Learned Latent Space of AE&quot; /&gt;
+&lt;p&gt;In Machine Learning the Manifold hypothesis says that meaningful data is often located in a low-dimensional manifold of high-dimensional input data.&lt;/p&gt;
+
+&lt;p&gt;Learned 2D latent space with ordinary autoencoder:
+&lt;img src=&quot;/images/vae/mnist_ae.png&quot; alt=&quot;Learned Latent Space of AE&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Learned 2D latent space with variational autoencoder:
 &lt;img src=&quot;/images/vae/mnist_vae.png&quot; alt=&quot;Learned Latent Space of VAE&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Examples for Reconstructions of the Autoencoder:
 &lt;img src=&quot;/images/vae/mnist_7.png&quot; alt=&quot;MNIST digit&quot; /&gt;
-&lt;img src=&quot;/images/vae/recon_7.png&quot; alt=&quot;MNIST reconstruction&quot; /&gt;&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;vae/vae_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;vae/vae_feature.png&quot;}" /></entry><entry><title>Guide for better Tensorflow</title><link href="/blog/ai/tf-tipps/" rel="alternate" type="text/html" title="Guide for better Tensorflow" /><published>2018-09-14T20:00:00+02:00</published><updated>2018-09-14T20:00:00+02:00</updated><id>/blog/ai/tf-tipps</id><content type="html" xml:base="/blog/ai/tf-tipps/">&lt;nav class=&quot;toc&quot;&gt;
+&lt;img src=&quot;/images/vae/recon_7.png&quot; alt=&quot;MNIST reconstruction&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;Next we want to use a VAE to encode a manifold for human faces. Furthermore we want to apply meaningful transitions in latent space to add features to images.
+&lt;img src=&quot;/images/vae/face.png&quot; alt=&quot;Face example&quot; /&gt;
+&lt;img src=&quot;/images/vae/face_recon.png&quot; alt=&quot;Face reconstruction&quot; /&gt;&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;vae/vae_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;vae/vae_feature.png&quot;}" /></entry><entry><title>Guide for better Tensorflow</title><link href="/blog/ai/tf-tipps/" rel="alternate" type="text/html" title="Guide for better Tensorflow" /><published>2018-09-14T20:00:00+02:00</published><updated>2018-09-14T20:00:00+02:00</updated><id>/blog/ai/tf-tipps</id><content type="html" xml:base="/blog/ai/tf-tipps/">&lt;nav class=&quot;toc&quot;&gt;
 &lt;ul id=&quot;markdown-toc&quot;&gt;
   &lt;li&gt;&lt;a href=&quot;#graph-definition-vs-execution&quot; id=&quot;markdown-toc-graph-definition-vs-execution&quot;&gt;1 Graph Definition vs. Execution&lt;/a&gt;&lt;/li&gt;
   &lt;li&gt;&lt;a href=&quot;#tensor-shapes&quot; id=&quot;markdown-toc-tensor-shapes&quot;&gt;2 Tensor Shapes&lt;/a&gt;&lt;/li&gt;

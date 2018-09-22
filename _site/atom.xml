@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-15T17:06:45+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Variational Autoencoders</title><link href="/blog/ai/vae/" rel="alternate" type="text/html" title="Variational Autoencoders" /><published>2018-09-15T12:00:00+02:00</published><updated>2018-09-15T12:00:00+02:00</updated><id>/blog/ai/vae</id><content type="html" xml:base="/blog/ai/vae/">&lt;nav class=&quot;toc&quot;&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"><generator uri="http://jekyllrb.com" version="3.1.6">Jekyll</generator><link href="/atom.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2018-09-22T09:27:11+02:00</updated><id>/</id><title>Tim Schneider</title><subtitle>personal blog</subtitle><entry><title>Variational Autoencoders</title><link href="/blog/ai/vae/" rel="alternate" type="text/html" title="Variational Autoencoders" /><published>2018-09-15T12:00:00+02:00</published><updated>2018-09-15T12:00:00+02:00</updated><id>/blog/ai/vae</id><content type="html" xml:base="/blog/ai/vae/">&lt;nav class=&quot;toc&quot;&gt;
 
 &lt;/nav&gt;
 
@@ -122,8 +122,100 @@ Like a hook you can link a peace of code to a particular stage of the session:&l
 
 &lt;/nav&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/mdn/mdn_prediction.png&quot; alt=&quot;MDN prediction&quot; /&gt;
-&lt;img src=&quot;/images/mdn/mdn_temperatures.gif&quot; alt=&quot;MDN temperature&quot; /&gt;
+&lt;p&gt;Some kind of patterns can not be captured with an ordinary feedfoward neuronal network. Take for example the function plotted below. Well it is not a function in mathematical sense, because the mapping $X \mapsto Y$ is ambiguous. So we can not use a function $X \mapsto Y$ to regress such a pattern.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/mdn/mdn_prediction.png&quot; alt=&quot;MDN prediction&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Mixture Density Networks (MDN) model this pattern with a mixture of Gaussian distributions. The loss fucntion for this network can be derived from minimizing the negative log-likelihood of the data, w.r.t. the mixture of Gaussian distributions.&lt;/p&gt;
+
+&lt;p&gt;\begin{equation}
+\mathcal{L}(y,x) = - \log \Big[ \sum_{k=0}^{K} \Pi_k(x) \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;We can benefit from implementations already provided in &lt;code class=&quot;highlighter-rouge&quot;&gt;tf.contrib.distributions&lt;/code&gt; for both, the &lt;strong&gt;categorical distribution&lt;/strong&gt; $\Pi_k(x)$&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;tf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contrib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;distributions&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;OneHotCategorical&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;probs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;and the Gaussian parts $\mathcal{N}$ of the mixture&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;tf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;contrib&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;distributions&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Normal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;scale&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;We use a neuronal network to regress the parameters of the distributions:
+We want $\pi$ to be a categorical distribution summing to one. This can be achieved by soft-max loss. The soft max loss for the logits $z$ of the mixture distribution $\pi$ is:
+\begin{equation}
+\pi_j = \sigma(z_j) = \frac{e^{z_j}}{\sum_{k=0}^{K} e^{z_k}}
+\end{equation}&lt;/p&gt;
+
+&lt;p&gt;For numerical stability reasons we do not regress $\pi$ directly with the network, but the probabilities in log-space $\log(\pi)$. This simplifies the soft-max as follows:&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+\forall_j: \; \log(\pi_j) = \log\big(\sigma(z_j)\big) &amp;amp; = \log\big(\frac{e^{z_j}}{\sum_{k=0}^{K} e^{z_k}} \big)
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= \log\big(e^{z_j} \big) - \log \big( \sum_{k=0}^{K} e^{z_k} \big)
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= z_j - \log \big( \sum_{k=0}^{K} e^{z_k} \big)
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;The second part of the formula can be computed numerically stable with&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;	&lt;span class=&quot;n&quot;&gt;tf&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reduce_logsumexp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;...&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Let’s see how the loss changes with these adaptions:&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+\mathcal{L}(y,x) &amp;amp; = - \log \Big[ \sum_{k=0}^{K} \Pi_k(x) \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= - \log \Big[ \sum_{k=0}^{K} e^{\log\big(\pi_k(x) \big)} \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= - \log \Big[ \sum_{k=0}^{K} e^{\log\big(\pi_k(x) \big) + \log \Big( \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big) } \Big]
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;The probability of the Gaussian in log-space simplifies to:
+\begin{align}
+\log \Big( \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big) &amp;amp;= \log(\frac{1}{\sigma \sqrt{2\pi}}) + \log\Big(e^{- 0.5 \big( \frac{y - \mu_k}{\sigma} \big)^2} \Big)
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \big( \frac{y - \mu_k}{\sigma} \big)^2
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \frac{ (y - \mu_k ) ^2 }{\sigma ^2}
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \frac{ (y - \mu_k ) ^2 }{e^{2 * \log(\sigma)}}
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;\begin{align}
+= -log(\sigma) - \log(\sqrt{2\pi}) - 0.5 \frac{ (y - \mu_k ) ^2 }{e^{2 * \log(\sigma)}}
+\end{align}&lt;/p&gt;
+
+&lt;p&gt;The loss is now a function of $\log(\sigma), \log(\Pi)$ and $ \mu$ which we regress with the neural network.&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;Additionally we can add a temperature parameter $\tau$ to control the uncertainty of our learned model as you can see below.
+&lt;img src=&quot;/images/mdn/mdn_temperatures.gif&quot; alt=&quot;MDN temperature&quot; /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;If we cut a slice of the plot for $X=0$ we can see the learned mixture of Gaussians for the distribution $\mathcal{P}(Y)$ over outcomes $Y$ :
 &lt;img src=&quot;/images/mdn/mixture_pdf.png&quot; alt=&quot;pdf&quot; /&gt;&lt;/p&gt;</content><summary></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="{&quot;teaser&quot;=&gt;&quot;mdn/mdn_teaser.gif&quot;, &quot;feature&quot;=&gt;&quot;mdn/mdn_feature.png&quot;}" /></entry><entry><title>Predictive Maintenance using LSTM Autoencoder</title><link href="/blog/ai/predictive-maintenance/" rel="alternate" type="text/html" title="Predictive Maintenance using LSTM Autoencoder" /><published>2018-08-31T00:00:00+02:00</published><updated>2018-08-31T00:00:00+02:00</updated><id>/blog/ai/predictive-maintenance</id><content type="html" xml:base="/blog/ai/predictive-maintenance/">&lt;nav class=&quot;toc&quot;&gt;
 
 &lt;/nav&gt;

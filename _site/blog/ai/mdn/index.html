@@ -157,8 +157,100 @@
 
 </nav>
 
-<p><img src="/images/mdn/mdn_prediction.png" alt="MDN prediction" />
-<img src="/images/mdn/mdn_temperatures.gif" alt="MDN temperature" />
+<p>Some kind of patterns can not be captured with an ordinary feedfoward neuronal network. Take for example the function plotted below. Well it is not a function in mathematical sense, because the mapping $X \mapsto Y$ is ambiguous. So we can not use a function $X \mapsto Y$ to regress such a pattern.</p>
+
+<p><img src="/images/mdn/mdn_prediction.png" alt="MDN prediction" /></p>
+
+<p>Mixture Density Networks (MDN) model this pattern with a mixture of Gaussian distributions. The loss fucntion for this network can be derived from minimizing the negative log-likelihood of the data, w.r.t. the mixture of Gaussian distributions.</p>
+
+<p>\begin{equation}
+\mathcal{L}(y,x) = - \log \Big[ \sum_{k=0}^{K} \Pi_k(x) \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{equation}</p>
+
+<p>We can benefit from implementations already provided in <code class="highlighter-rouge">tf.contrib.distributions</code> for both, the <strong>categorical distribution</strong> $\Pi_k(x)$</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">OneHotCategorical</span><span class="p">(</span><span class="n">probs</span><span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+</code></pre>
+</div>
+
+<p>and the Gaussian parts $\mathcal{N}$ of the mixture</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="n">tf</span><span class="o">.</span><span class="n">contrib</span><span class="o">.</span><span class="n">distributions</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span> <span class="mf">1.0</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<hr />
+
+<p>We use a neuronal network to regress the parameters of the distributions:
+We want $\pi$ to be a categorical distribution summing to one. This can be achieved by soft-max loss. The soft max loss for the logits $z$ of the mixture distribution $\pi$ is:
+\begin{equation}
+\pi_j = \sigma(z_j) = \frac{e^{z_j}}{\sum_{k=0}^{K} e^{z_k}}
+\end{equation}</p>
+
+<p>For numerical stability reasons we do not regress $\pi$ directly with the network, but the probabilities in log-space $\log(\pi)$. This simplifies the soft-max as follows:</p>
+
+<p>\begin{align}
+\forall_j: \; \log(\pi_j) = \log\big(\sigma(z_j)\big) &amp; = \log\big(\frac{e^{z_j}}{\sum_{k=0}^{K} e^{z_k}} \big)
+\end{align}</p>
+
+<p>\begin{align}
+= \log\big(e^{z_j} \big) - \log \big( \sum_{k=0}^{K} e^{z_k} \big)
+\end{align}</p>
+
+<p>\begin{align}
+= z_j - \log \big( \sum_{k=0}^{K} e^{z_k} \big)
+\end{align}</p>
+
+<p>The second part of the formula can be computed numerically stable with</p>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code>	<span class="n">tf</span><span class="o">.</span><span class="n">reduce_logsumexp</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>Let’s see how the loss changes with these adaptions:</p>
+
+<p>\begin{align}
+\mathcal{L}(y,x) &amp; = - \log \Big[ \sum_{k=0}^{K} \Pi_k(x) \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{align}</p>
+
+<p>\begin{align}
+= - \log \Big[ \sum_{k=0}^{K} e^{\log\big(\pi_k(x) \big)} \cdot \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big]
+\end{align}</p>
+
+<p>\begin{align}
+= - \log \Big[ \sum_{k=0}^{K} e^{\log\big(\pi_k(x) \big) + \log \Big( \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big) } \Big]
+\end{align}</p>
+
+<p>The probability of the Gaussian in log-space simplifies to:
+\begin{align}
+\log \Big( \mathcal{N}\big(y | \mu_k(x), \sigma_k(x) \big) \Big) &amp;= \log(\frac{1}{\sigma \sqrt{2\pi}}) + \log\Big(e^{- 0.5 \big( \frac{y - \mu_k}{\sigma} \big)^2} \Big)
+\end{align}</p>
+
+<p>\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \big( \frac{y - \mu_k}{\sigma} \big)^2
+\end{align}</p>
+
+<p>\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \frac{ (y - \mu_k ) ^2 }{\sigma ^2}
+\end{align}</p>
+
+<p>\begin{align}
+= \log(\frac{1}{\sigma \sqrt{2\pi}}) - 0.5 \frac{ (y - \mu_k ) ^2 }{e^{2 * \log(\sigma)}}
+\end{align}</p>
+
+<p>\begin{align}
+= -log(\sigma) - \log(\sqrt{2\pi}) - 0.5 \frac{ (y - \mu_k ) ^2 }{e^{2 * \log(\sigma)}}
+\end{align}</p>
+
+<p>The loss is now a function of $\log(\sigma), \log(\Pi)$ and $ \mu$ which we regress with the neural network.</p>
+
+<hr />
+<p>Additionally we can add a temperature parameter $\tau$ to control the uncertainty of our learned model as you can see below.
+<img src="/images/mdn/mdn_temperatures.gif" alt="MDN temperature" /></p>
+
+<hr />
+
+<p>If we cut a slice of the plot for $X=0$ we can see the learned mixture of Gaussians for the distribution $\mathcal{P}(Y)$ over outcomes $Y$ :
 <img src="/images/mdn/mixture_pdf.png" alt="pdf" /></p>
 
 
